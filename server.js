@@ -1,4 +1,7 @@
 import expres from 'express';
+import conectarAoBanco from './src/config/dbConfig.js';
+
+const conexao = await conectarAoBanco(process.env.STRING_CONEXAO);
 
 const posts = [
     {
@@ -45,7 +48,9 @@ app.listen(3000, () => {
     console.log("Servidor Escutando...");
 });
 
-app.get("/posts", (req, res) => {
+app.get("/posts", async (req, res) => {    
+    //res.status(200).json(posts);
+    const posts = await getTodosPosts();
     res.status(200).json(posts);
 });
 
@@ -62,3 +67,9 @@ app.get("/posts/:id", (req, res) => {
     const index = buscarPostPorId(req.params.id);
     res.status(200).json(posts[index]);
 });
+
+async function getTodosPosts() {                          
+    const db = conexao.db("imersao-instalike");
+    const colecao = db.collection("posts");
+    return colecao.find().toArray();
+}
